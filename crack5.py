@@ -7,6 +7,7 @@ import string
 import requests
 
 from vigenere import decrypt
+import utils
 
 
 s = 'Ccoheal ieu w qwu tcb'.lower()
@@ -122,16 +123,9 @@ def test_crap():
     assert not dictionary.is_prefix_of_a_word('buh')
 
 
-i = 0
 
-
+@utils.log_nth_call(1000, time=True)
 def process_key(key=''):
-    global i
-    i += 1
-
-    if i % 1000 == 0:
-        print('{}    '.format(key), end='\r')
-        sys.stdout.flush()
 
     if len(key) > len(s):
         #print("longer than {}".format(key))
@@ -144,9 +138,6 @@ def process_key(key=''):
         if check_online(key):
             print("legan! {} {}".format(key, decrypted))
             sys.exit(0)
-
-    deeper = need_to_go_deeper(decrypted, len(key))
-    print('{} -> {} -> {}'.format(key, decrypted, deeper))
 
     if need_to_go_deeper(decrypted, len(key)):
     #if dictionary.is_prefix_of_a_word(decrypted[:len(key)]):
