@@ -6,6 +6,7 @@ from functools import reduce
 import string
 import requests
 
+from vigenere import decrypt
 
 
 s = 'Ccoheal ieu w qwu tcb'.lower()
@@ -47,32 +48,7 @@ class Dictionary:
         return any(self.is_a_word(s) for s in strings)
 
 
-LENGTHS = {len(w) for w in s.split()}
-
-dictionary = Dictionary('/usr/share/dict/american-english', LENGTHS)
-
-ALPHA = 'abcdefghijklmnopqrstuvwxyz'
-
-def decrypt(key, ciphertext):
-    words = ciphertext.lower().split()
-
-    def decrypt_char(key_char, cipher_char):
-        total = ALPHA.index(cipher_char) - ALPHA.index(key_char)
-        return ALPHA[total % 26]
-
-    key_iter = iter(cycle(key.lower()))
-
-    def decrypt_word(word):
-        return ''.join(decrypt_char(next(key_iter), c) for c in word)
-
-    return ' '.join(decrypt_word(word) for word in words).strip()
-
-
-def test_decrypt():
-    assert "zizhbgw" == decrypt(key="dupa", ciphertext="Ccoheal")
-    assert "zizhbgw iba h qta ecy" == decrypt(key="dupa", ciphertext="Ccoheal ieu w qwu tcb")
-    assert "" == decrypt(key="", ciphertext="Ccoheal ieu w qwu tcb")
-
+dictionary = Dictionary('/usr/share/dict/american-english', {len(w) for w in s.split()})
 
 def check_online(key):
     if key == '':
@@ -88,30 +64,22 @@ def check_online(key):
     return status_code != 403
 
 
-def prefix_of_a_valid_word(decrypted):
-    return dictionary.is_prefix_of_a_word(decrypted)
-
-
 def test_prefix_of_a_valid_word():
-    assert prefix_of_a_valid_word('the')
-    assert prefix_of_a_valid_word('t')
-    assert prefix_of_a_valid_word('')
-    assert not prefix_of_a_valid_word('legan')
-
-
-def is_any_string_a_word(strings):
-    return dictionary.are_all_words(strings)
+    assert dictionary.is_prefix_of_a_word('the')
+    assert dictionary.is_prefix_of_a_word('t')
+    assert dictionary.is_prefix_of_a_word('')
+    assert not dictionary.is_prefix_of_a_word('legan')
 
 
 def test_is_any_string_a_word():
-    assert not is_any_string_a_word(['banana']) # invalid length
-    assert not is_any_string_a_word(['legan', 'banana']) # invalid word and length
-    assert not is_any_string_a_word(['legan']) # invalid word
-    assert not is_any_string_a_word(['legan', 'zyszkiew']) # invalid words
+    assert not dictionary.are_all_words(['banana']) # invalid length
+    assert not dictionary.are_all_words(['legan', 'banana']) # invalid word and length
+    assert not dictionary.are_all_words(['legan']) # invalid word
+    assert not dictionary.are_all_words(['legan', 'zyszkiew']) # invalid words
 
-    assert is_any_string_a_word(['the'])
-    assert is_any_string_a_word(['two'])
-    assert is_any_string_a_word(['two', 'the'])
+    assert dictionary.are_all_words(['the'])
+    assert dictionary.are_all_words(['two'])
+    assert dictionary.are_all_words(['two', 'the'])
 
 
 def need_to_go_deeper(decrypted, key_length):
@@ -119,8 +87,8 @@ def need_to_go_deeper(decrypted, key_length):
         return True
 
     valid = decrypted[:key_length]
-
-    return any(prefix_of_a_valid_word(w) for w in valid.split())
+    words = valid.split()
+    return dictionary.is_prefix_of_a_word(words[0])
 
 
 def test_need_to_go_deeper():
@@ -142,8 +110,16 @@ def test_need_to_go_deeper():
     assert not need_to_go_deeper('żyszkiew', 6)
     assert not need_to_go_deeper('legan', 10)
 
-    assert need_to_go_deeper('legan the zyszkiew', 20)
-    assert need_to_go_deeper('legan zyszkiew', 7)
+    assert not need_to_go_deeper('legan the zyszkiew', 20)
+    assert not need_to_go_deeper('legan zyszkiew', 7)
+
+
+def test_crap():
+    '''
+    bih -> buhgwtk axt o jvm mbt -> False
+    '''
+
+    assert not dictionary.is_prefix_of_a_word('buh')
 
 
 i = 0
@@ -163,14 +139,14 @@ def process_key(key=''):
 
     decrypted = decrypt(key, s)
 
-    if is_any_string_a_word(decrypted.split()):
+    if dictionary.are_all_words(decrypted.split()):
         print("got candidate: {} {}".format(key, decrypted))
         if check_online(key):
             print("legan! {} {}".format(key, decrypted))
             sys.exit(0)
 
-    #deeper = need_to_go_deeper(decrypted, len(key))
-    #print('{} -> {} -> {}'.format(key, decrypted, deeper))
+    deeper = need_to_go_deeper(decrypted, len(key))
+    print('{} -> {} -> {}'.format(key, decrypted, deeper))
 
     if need_to_go_deeper(decrypted, len(key)):
     #if dictionary.is_prefix_of_a_word(decrypted[:len(key)]):
