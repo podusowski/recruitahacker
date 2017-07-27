@@ -2,25 +2,29 @@ import datetime
 
 
 call_counter = 0
-last_call = datetime.datetime.now()
+begin = datetime.datetime.now()
 
 
-def log_nth_call(n, time=False):
+def log_nth_call(n):
     def wrapper(f):
         def decorated(*args, **kwargs):
             global call_counter
-            global last_call
+            global begin
 
             call_counter += 1
 
-            if call_counter % n == 0:
-                if time:
-                    now = datetime.datetime.now()
-                    print(', '.join([str(now - last_call), *args]), end="\r")
-                    last_call = now
-                else:
-                    print(', '.join(args), end="\r")
+            result = f(*args, **kwargs)
 
-            f(*args, **kwargs)
+            if call_counter % n == 0:
+                now = datetime.datetime.now()
+                print(', '.join([
+                                 f.__name__,
+                                 str(call_counter),
+                                 str(now - begin),
+                                 *[str(a) for a in args],
+                                 str(result)
+                                ]), end="\r")
+
+            return result
         return decorated
     return wrapper
