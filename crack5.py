@@ -9,6 +9,7 @@ from unittest.mock import patch, mock_open
 from vigenere import decrypt
 import utils
 import io
+import codecs
 
 
 s = 'Ccoheal ieu w qwu tcb'.lower()
@@ -17,14 +18,19 @@ s = 'Ccoheal ieu w qwu tcb'.lower()
 
 class Dictionary:
     def __init__(self, filename, lengths):
-        with open(filename, 'r') as f:
+        with codecs.open(filename, encoding='utf-8') as f:
             all_words = f.read().split()
-            words = {w.lower() for w in all_words if len(w) in lengths and w.lower() == w and not "'" in w}
+            #words = {w.lower() for w in all_words if len(w) in lengths and w.lower() == w and not "'" in w}
+            words = {w.lower() for w in all_words if len(w) in lengths and not "'" in w}
 
             words.add("arcyber")
-            words.add("i")
-            words.add("a")
-            words.add("u")
+            words.add("hacking")
+            words.add("hackers")
+            words.add("vinegar")
+            words.add("america")
+            #words.add("i")
+            #words.add("a")
+            #words.add("u")
 
             self.words = words
 
@@ -63,7 +69,8 @@ class Dictionary:
         return all(self.is_a_word(s) for s in strings if len(s) > 3)
 
 
-dictionary = Dictionary('/usr/share/dict/american-english', {len(w) for w in s.split() if len(w) > 1})
+#dictionary = Dictionary('/usr/share/dict/american-english', {len(w) for w in s.split() if len(w) > 1})
+dictionary = Dictionary('dictionary.txt', {len(w) for w in s.split()})
 
 
 with open('blacklist.txt', 'r') as blacklist_file:
@@ -172,7 +179,6 @@ def need_to_go_deeper(decrypted, key_length):
         return False
 
     words = trimmed.split()
-
     last = words[-1]
     all_but_last = words[:-1]
 
