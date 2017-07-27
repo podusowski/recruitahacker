@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 
 import sys
-from itertools import cycle, combinations_with_replacement, product, zip_longest
-from functools import reduce
-import string
 import requests
-from unittest.mock import patch, mock_open
-from vigenere import decrypt
-import utils
-import io
 import codecs
+import string
+# from unittest.mock import patch, mock_open
+# import io
+
+import vigenere
+import utils
 
 
 s = 'Ccoheal ieu w qwu tcb'.lower()
@@ -187,19 +186,7 @@ def need_to_go_deeper(decrypted, key_length):
     else:
         last_ok = dictionary.is_prefix_of_a_word(last)
 
-    result = last_ok and all(dictionary.is_a_word(word) for word in all_but_last)
-
- #   print('{} {} {} key_length: {}, result: {}'.format(
- #       str(all_but_last),
- #       str(last),
- #       dictionary.is_a_word('qua'),
- #       key_length,
- #       result
- #   ))
-
- #   print(''.join(without_spaces))
-
-    return result
+    return last_ok and all(dictionary.is_a_word(word) for word in all_but_last)
 
 
 def test_need_to_go_deeper():
@@ -238,7 +225,7 @@ def test_crap():
 
 @utils.log_nth_call(10000)
 def process_key(key='', max_key_length=20):
-    decrypted = decrypt(key, s)
+    decrypted = vigenere.decrypt(key, s)
 
     if dictionary.are_all_words(decrypted.split()):
         print('key: "{}" message: "{}"'.format(key, decrypted))
