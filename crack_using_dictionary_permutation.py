@@ -12,7 +12,7 @@ dictionary = Dictionary('dictionary.txt', {len(w) for w in s.split()})
 
 
 def words(length):
-    return {w for w in dictionary.words if len(w) == length}
+    return [w for w in dictionary.words if len(w) == length]
 
 
 l = [words(len(w)) for w in s.split()]
@@ -23,7 +23,7 @@ def check_key(key):
     decrypted = ''.join(x)
     key = vigenere.find_shortest_key(s, decrypted)
 
-    if len(key) == len(decrypted):
+    if len(key) != 15:
         return
 
     print('{} {}'.format(decrypted, key))

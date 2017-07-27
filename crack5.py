@@ -90,7 +90,7 @@ def check_online(key):
     while not status_code or status_code == 504:
         url = 'http://www.recruitahacker.net/Puzzle/Mid'
         status_code = requests.get(url, params={'key': key}).status_code
-        print('key: {} server: {}                               '.format(key, status_code))
+        print('key: {} ({}) server: {}                               '.format(key, len(key), status_code))
 
     key_valid = status_code != 403
     if not key_valid:
