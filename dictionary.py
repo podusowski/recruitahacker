@@ -76,3 +76,72 @@ def test_length_limited_dictionary():
     assert dictionary.is_a_word('the')
 
     assert not dictionary.is_a_word('haemoglobin')
+
+
+class PrincetonDictionary:
+    def __init__(self):
+        self.adjectives = set(self._load('princeton-wordnet/index.adj'))
+        self.nouns = set(self._load('princeton-wordnet/index.noun'))
+        self.adverbs = set(self._load('princeton-wordnet/index.adv'))
+        self.verbs = set(self._load('princeton-wordnet/index.verb'))
+
+    def _load(self, filename):
+        ret = []
+        with open(filename, 'r') as f:
+            for line in f:
+                word = line.split()[0]
+                ret.append(word)
+        return ret
+
+    def word_classes(self, word):
+        ret = set()
+        if word in self.adjectives:
+            ret.add('adjective')
+        if word in self.nouns:
+            ret.add('noun')
+        if word in self.adverbs:
+            ret.add('adverb')
+        if word in self.verbs:
+            ret.add('verb')
+        return ret
+
+    def words_make_sense_as_whole(self, words):
+
+        def make_sense(first, second):
+            first_classes = self.word_classes(first)
+            second_classes = self.word_classes(second)
+
+            various_classes = len(first_classes) > 1 or len(second_classes) > 1
+
+            return various_classes or first_classes != second_classes
+
+        return all(make_sense(first, second) for first, second in _pairs(words))
+
+
+
+def test_princeton_dictionary():
+    dictionary = PrincetonDictionary()
+
+    assert {'adjective'} == dictionary.word_classes('awesome')
+    assert {'noun'} == dictionary.word_classes('computer')
+    assert {'adverb'} == dictionary.word_classes('repeatedly')
+    assert {'verb'} == dictionary.word_classes('eat')
+
+    assert {'noun', 'verb'} == dictionary.word_classes('hack')
+
+
+def _pairs(a):
+    return zip(a, a[1:])
+
+
+def test_pairs():
+    assert [(1, 2), (2, 3)] == list(_pairs([1, 2, 3]))
+
+
+def test_words_make_sense_as_whole():
+    dictionary = PrincetonDictionary()
+
+    assert dictionary.words_make_sense_as_whole(['hacking', 'computer'])
+    assert dictionary.words_make_sense_as_whole(['hack', 'hack'])
+    assert not dictionary.words_make_sense_as_whole(['computer', 'computer'])
+
