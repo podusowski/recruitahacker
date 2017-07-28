@@ -6,11 +6,11 @@ import vigenere
 import crack5
 import utils
 import operator
+from dictionary import PrincetonDictionary
 
 
 CIPHER_TEXT = 'Ccoheal ieu w qwu tcb'
 DICTIONARY_FILE = 'dictionary.txt'
-KEY_LENGHTS = {15}
 LOG_PERIOD = 10000
 
 
@@ -29,8 +29,6 @@ def print_combinations(comb):
 @utils.log_nth_call(LOG_PERIOD)
 def check_key(key, decrypted):
     shortest_key = vigenere.find_shortest_key(key, decrypted)
-    if not len(shortest_key) in KEY_LENGHTS:
-        return
     return crack5.check_online(shortest_key)
 
 
@@ -42,12 +40,18 @@ def possible_words(cipherText, dictFile):
     return all_possible_words
 
 
+princeton_dictionary = PrincetonDictionary()
+
+
 def check_all_keys_for_words(encrypted, words):
     def print_winner(key, phrase):
         print("Key found!\nKey:{}\nPhrase:{}".format(key, phrase))
 
     all_possible_phrases = product(*words)
+    all_possible_phrases = filter(princeton_dictionary.words_make_sense_as_whole, all_possible_phrases)
+
     for phrase in all_possible_phrases:
+        print(phrase)
         decrypted = ''.join(phrase)
         key = vigenere.find_shortest_key(encrypted, decrypted)
         if check_key(key, decrypted):
