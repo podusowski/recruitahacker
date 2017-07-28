@@ -2,19 +2,24 @@ import codecs
 
 
 class Dictionary:
-    def __init__(self, filename, lengths):
+    def __init__(self, filename, lengths=None):
         with codecs.open(filename, encoding='utf-8') as f:
             all_words = f.read().split()
-            #words = {w.lower() for w in all_words if len(w) in lengths and w.lower() == w and not "'" in w}
-            words = {w.lower() for w in all_words if len(w) in lengths and not "'" in w}
+
+            def correct_length(word):
+                if lengths is not None:
+                    return len(word) in lengths
+                return True
+
+            words = {w.lower() for w in all_words if correct_length(w) and not "'" in w}
 
             words.add("arcyber")
             words.add("hacking")
             words.add("hackers")
             words.add("vinegar")
             words.add("america")
-            #words.add("i")
-            #words.add("a")
+            words.add("i")
+            words.add("a")
             #words.add("u")
 
             self.words = words
@@ -52,3 +57,22 @@ class Dictionary:
             return False
 
         return all(self.is_a_word(s) for s in strings if len(s) > 3)
+
+
+def test_dictionary():
+    dictionary = Dictionary('american-english')
+
+    assert dictionary.is_a_word('hacker')
+    assert not dictionary.is_a_word('legan')
+
+    assert dictionary.is_prefix_of_a_word('hac') # hacker
+    assert dictionary.is_prefix_of_a_word('hacker')
+
+
+def test_length_limited_dictionary():
+    dictionary = Dictionary('american-english', lengths=[3, 6])
+
+    assert dictionary.is_a_word('hacker')
+    assert dictionary.is_a_word('the')
+
+    assert not dictionary.is_a_word('haemoglobin')
