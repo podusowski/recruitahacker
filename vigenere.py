@@ -8,7 +8,7 @@ def decrypt(key, ciphertext):
     words = ciphertext.lower().split()
 
     def decrypt_char(key_char, cipher_char):
-        total = ALPHA.index(cipher_char) - ALPHA.index(key_char)
+        total = _alpha_index(cipher_char) - _alpha_index(key_char)
         return ALPHA[total % 26]
 
     key_iter = iter(cycle(key.lower()))
@@ -29,12 +29,16 @@ def _drop_whitespace_and_make_list(s):
     return [c for c in s if c != ' ']
 
 
+def _alpha_index(c):
+    return ord(c) - 97
+
+
 def find_obvious_key(encrypted, decrypted):
     encrypted = _drop_whitespace_and_make_list(encrypted)
     decrypted = _drop_whitespace_and_make_list(decrypted)
 
     def key_char(enc, dec):
-        diff = ALPHA.index(enc) - ALPHA.index(dec)
+        diff = _alpha_index(enc) - _alpha_index(dec)
         return ALPHA[diff % 26]
 
     obvious_key = [key_char(e, d) for e, d in zip(encrypted, decrypted)]

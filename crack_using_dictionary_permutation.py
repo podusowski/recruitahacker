@@ -32,8 +32,7 @@ def print_combinations(comb):
 
 @utils.log_nth_call(LOG_PERIOD)
 def check_key(key, decrypted):
-    if len(key) < 11:
-        return crack5.check_online(key)
+    return crack5.check_online(key)
 
 
 def possible_words(cipherText, dictFile):
