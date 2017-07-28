@@ -10,7 +10,11 @@ from dictionary import PrincetonDictionary
 
 
 CIPHER_TEXT = 'Ccoheal ieu w qwu tcb'
-DICTIONARY_FILE = 'dictionary.txt'
+CIPHER_TEXT_LEN = len(CIPHER_TEXT.replace(' ', ''))
+
+print(CIPHER_TEXT_LEN)
+
+DICTIONARY_FILE = 'scrabble-dictionary.txt'
 LOG_PERIOD = 10000
 
 
@@ -28,8 +32,8 @@ def print_combinations(comb):
 
 @utils.log_nth_call(LOG_PERIOD)
 def check_key(key, decrypted):
-    shortest_key = vigenere.find_shortest_key(key, decrypted)
-    return crack5.check_online(shortest_key)
+    if len(key) < 11:
+        return crack5.check_online(key)
 
 
 def possible_words(cipherText, dictFile):
@@ -51,7 +55,7 @@ def check_all_keys_for_words(encrypted, words):
     all_possible_phrases = filter(princeton_dictionary.words_make_sense_as_whole, all_possible_phrases)
 
     for phrase in all_possible_phrases:
-        print(phrase)
+        #print(phrase)
         decrypted = ''.join(phrase)
         key = vigenere.find_shortest_key(encrypted, decrypted)
         if check_key(key, decrypted):

@@ -15,7 +15,7 @@ s = 'Ccoheal ieu w qwu tcb'.lower()
 #s = 'Ccoheal ieuw qwu tcb'.lower()
 
 
-from dictionary import Dictionary
+from dictionary import Dictionary, PrincetonDictionary
 
 
 #dictionary = Dictionary('/usr/share/dict/american-english', {len(w) for w in s.split() if len(w) > 1})
@@ -31,7 +31,6 @@ def check_online(key):
         return False
 
     if key in blacklist:
-        print('Key: {} already checked before!'.format(key))
         return False
 
     status_code = None
@@ -173,11 +172,16 @@ def test_crap():
     assert not dictionary.is_prefix_of_a_word('buh')
 
 
-@utils.log_nth_call(10000)
+princeton_dictionary = PrincetonDictionary()
+
+
+@utils.log_nth_call(100000)
 def process_key(key='', max_key_length=20):
     decrypted = vigenere.decrypt(key, s)
 
-    if dictionary.are_all_words(decrypted.split()):
+    phrase = decrypted.split()
+
+    if dictionary.are_all_words(phrase) and princeton_dictionary.words_make_sense_as_whole(phrase):
         print('key: "{}" message: "{}"'.format(key, decrypted))
         if check_online(key):
             print("legan! {} {}".format(key, decrypted))
