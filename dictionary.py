@@ -107,7 +107,12 @@ class PrincetonDictionary:
 
     def words_make_sense_as_whole(self, words):
 
+        duplicated_words = len(set(words)) != len(words)
+
         def make_sense(first, second):
+            if first == second:
+                return False
+
             first_classes = self.word_classes(first)
             second_classes = self.word_classes(second)
 
@@ -115,7 +120,7 @@ class PrincetonDictionary:
 
             return various_classes or first_classes != second_classes
 
-        return all(make_sense(first, second) for first, second in _pairs(words))
+        return not duplicated_words and all(make_sense(first, second) for first, second in _pairs(words))
 
 
 
@@ -128,6 +133,10 @@ def test_princeton_dictionary():
     assert {'verb'} == dictionary.word_classes('eat')
 
     assert {'noun', 'verb'} == dictionary.word_classes('hack')
+    assert {'noun', 'verb'} == dictionary.word_classes('rub')
+
+    assert {'noun'} == dictionary.word_classes('disease')
+    assert {'noun', 'verb'} == dictionary.word_classes('gun')
 
 
 def _pairs(a):
@@ -142,6 +151,9 @@ def test_words_make_sense_as_whole():
     dictionary = PrincetonDictionary()
 
     assert dictionary.words_make_sense_as_whole(['hacking', 'computer'])
-    assert dictionary.words_make_sense_as_whole(['hack', 'hack'])
+    assert dictionary.words_make_sense_as_whole(['hack', 'rub'])
+    assert not dictionary.words_make_sense_as_whole(['hack', 'hack'])
     assert not dictionary.words_make_sense_as_whole(['computer', 'computer'])
+
+    assert not dictionary.words_make_sense_as_whole(['hack', 'rub', 'hack'])
 
